@@ -2,8 +2,8 @@ FROM php:8.2-cli
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev libzip-dev zip \
-    && docker-php-ext-install pdo pdo_pgsql zip
+    git unzip libpq-dev libzip-dev zip libicu-dev \
+    && docker-php-ext-install pdo pdo_pgsql zip intl
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -23,7 +23,6 @@ RUN chmod -R 775 storage bootstrap/cache
 # Expose Render port
 EXPOSE 10000
 
-# Start Laravel
 # Start Laravel
 CMD php artisan migrate --force && \
     php artisan db:seed --force && \
