@@ -25,8 +25,7 @@ RUN chmod -R 775 storage bootstrap/cache
 EXPOSE 10000
 
 # Start Laravel
-CMD php artisan key:generate --force && \
-    php artisan config:clear && \
+CMD php artisan config:clear && \
     php artisan migrate --force && \
     php artisan db:seed --force && \
     php artisan config:cache && \
