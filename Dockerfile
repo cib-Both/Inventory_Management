@@ -1,9 +1,10 @@
-FROM php:8.2-cli
+FROM php:8.2-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git unzip libpq-dev libzip-dev zip libicu-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip intl
+    && docker-php-ext-install pdo pdo_pgsql zip intl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -17,6 +18,9 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
+# Generate application key
+RUN php artisan key:generate --force
+
 # Set permissions
 RUN chmod -R 775 storage bootstrap/cache
 
@@ -24,6 +28,9 @@ RUN chmod -R 775 storage bootstrap/cache
 EXPOSE 10000
 
 # Start Laravel
-CMD php artisan migrate --force && \
+CMD php artisan config:clear && \
+    php artisan migrate --force && \
     php artisan db:seed --force && \
-    php -S 0.0.0.0:10000 -t public
+    php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan serve --host=0.0.0.0 --port=10000
