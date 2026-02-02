@@ -1,6 +1,6 @@
 FROM php:8.2-cli
 
-# Install system dependencies
+# Install system dependencies and Node.js
 RUN apt-get update && apt-get install -y \
     git unzip libpq-dev libzip-dev zip libicu-dev curl \
     && docker-php-ext-install pdo pdo_pgsql zip intl \
@@ -35,16 +35,17 @@ RUN mkdir -p storage/framework/sessions \
     public/storage
 
 # Set permissions
-RUN chmod -R 775 storage bootstrap/cache public/storage
+RUN chmod -R 775 storage bootstrap/cache public
 
 # Expose Render port
 EXPOSE 10000
 
-# Start Laravel - generate key at runtime when env vars are available
+# Start Laravel
 CMD php artisan key:generate --force && \
+    php artisan storage:link && \
     php artisan config:clear && \
     php artisan cache:clear && \
     php artisan view:clear && \
     php artisan migrate --force && \
-    php artisan db:seed --force && \
+    (php artisan db:seed --force || true) && \
     php artisan serve --host=0.0.0.0 --port=10000 --no-reload
