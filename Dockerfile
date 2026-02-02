@@ -18,9 +18,6 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Generate application key
-RUN php artisan key:generate --force
-
 # Set permissions
 RUN chmod -R 775 storage bootstrap/cache
 
@@ -28,7 +25,8 @@ RUN chmod -R 775 storage bootstrap/cache
 EXPOSE 10000
 
 # Start Laravel
-CMD php artisan config:clear && \
+CMD php artisan key:generate --force && \
+    php artisan config:clear && \
     php artisan migrate --force && \
     php artisan db:seed --force && \
     php artisan config:cache && \
