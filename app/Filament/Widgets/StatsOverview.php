@@ -27,7 +27,7 @@ class StatsOverview extends BaseWidget
                 ->description('All Purchase')
                 ->descriptionIcon('heroicon-m-arrow-down-on-square-stack')
                 ->color('info'),
-            Stat::make('Inventory Loan', Inventory::where('status', '!=', 'Available')->count())
+            Stat::make('Inventory Loan', Inventory::where('status', '!=', 'available')->count())
                 ->description('Inventory being loaned')
                 ->descriptionIcon('heroicon-m-arrow-up-on-square-stack')
                 ->color('warning'),
