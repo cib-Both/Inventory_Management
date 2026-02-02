@@ -15,8 +15,18 @@ WORKDIR /var/www
 # Copy project files
 COPY . .
 
+# Create .env file from .env.example
+RUN cp .env.example .env
+
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
+
+# Create necessary storage directories
+RUN mkdir -p storage/framework/sessions \
+    storage/framework/views \
+    storage/framework/cache/data \
+    storage/logs \
+    bootstrap/cache
 
 # Set permissions
 RUN chmod -R 775 storage bootstrap/cache
@@ -24,10 +34,10 @@ RUN chmod -R 775 storage bootstrap/cache
 # Expose Render port
 EXPOSE 10000
 
-# Start Laravel
-CMD php artisan config:clear && \
+# Start Laravel - generate key at runtime when env vars are available
+CMD php artisan key:generate --force && \
+    php artisan config:clear && \
+    php artisan cache:clear && \
     php artisan migrate --force && \
     php artisan db:seed --force && \
-    php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan serve --host=0.0.0.0 --port=10000
+    php artisan serve --host=0.0.0.0 --port=10000 --no-reload
