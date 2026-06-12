@@ -1,0 +1,637 @@
+SOFTWARE TESTING REPORT
+
+Inventory Management System | Laravel 11 + Filament
+
+
+
+1. Project Information
+
+
+
+Project Title: Inventory Management System
+
+Tech Stack: Laravel 11, Filament Admin Panel, Livewire, Tailwind CSS, MySQL
+
+Course / Subject: Software Testing
+
+Group 4: Chem Indraboth, Nat Sinoeun, Khun Kimheng, Thy Sovannmakara, Nhun Pisal
+
+Instructor: Mr. Heng Chanarin
+
+Date: May 30, 2026
+
+
+
+2. System Overview
+
+
+
+This project is a fully-featured Inventory Management System built with Laravel 11 and the Filament admin panel framework. It provides a responsive, modern UI backed by Laravel's Eloquent ORM and secure authentication system.
+
+Purpose: Manage products, categories, stock in/out transactions, and user authentication for inventory control, Role and Permission
+
+Target Users: Business admins, inventory managers, warehouse staff
+
+
+
+Main Features
+
+Product management (create, read, update, delete)
+
+Category management with product associations
+
+Supplier management 
+
+Loan inventory management 
+
+Stock In / Stock Out transaction recording
+
+Dashboard with inventory overview
+
+Admin login and role/permission 
+
+
+
+3. Testing Objectives
+
+
+
+Validate all CRUD operations for Products, Categories, and Stock transactions
+
+Detect bugs and logical errors in inventory and stock management modules
+
+Verify authentication and authorization controls
+
+Ensure data validation is enforced on all input fields
+
+Confirm stock integrity (no negative quantities)
+
+
+
+
+
+
+
+
+
+4. Testing Scope
+
+
+
+In Scope
+
+Authentication module (login, logout, route protection)
+
+Products module (CRUD, validation, search/filter)
+
+Categories module (CRUD, referential integrity)
+
+Out of Scope
+
+Database migration performance under high load
+
+Third-party package internals (Filament, Livewire core)
+
+Email/notification integrations
+
+
+
+5. Testing Strategy / Approach
+
+
+
+Testing Types: Unit Testing, Feature/Integration Testing
+
+Methods: Black-box testing for UI flows; White-box testing for Laravel model/controller logic
+
+Framework: PHPUnit (built into Laravel via phpunit.xml)
+
+Manual Testing: Filament admin panel tested manually in browser
+
+
+
+6. Test Environment
+
+
+
+Hardware: Laptop (Ryzen 9, 16 GB RAM)
+
+Operating System: Windows 11
+
+PHP Version: PHP 8.2+
+
+Framework: Laravel 11
+
+Database: MySQL 8.0 
+
+Browser: Chrome
+
+Testing Tools: PHPUnit, Artisan test runner (php artisan test)
+
+
+
+7. Test Cases
+
+Test Case ID
+
+Test Scenario
+
+Test Steps
+
+Expected Result
+
+Status
+
+Remarks
+
+TC01
+
+Admin Can Access Home
+
+Create admin role ? create admin user ? assign role ? GET /
+
+HTTP 200 response
+
+Pass
+
+-
+
+TC02
+
+Admin Has Admin Role
+
+Create admin user ? hasRole('admin')
+
+Returns true
+
+Pass
+
+-
+
+TC03
+
+Category Can Be Created
+
+Category::create(['name'=>'Electronics']) ? assertDatabaseHas
+
+Record exists in categories table
+
+Pass
+
+-
+
+TC04
+
+Supplier Can Be Created
+
+Supplier::create(['name'=>'Acme']) ? assertDatabaseHas
+
+Record exists in suppliers table
+
+Pass
+
+-
+
+TC05
+
+Product Can Be Created
+
+Create category & supplier ? Product::create ? assertDatabaseHas
+
+Product with brand 'AcmeBrand' in DB
+
+Pass
+
+-
+
+TC06
+
+Product Belongs to Category
+
+Create product ? check product.category_id and product.category.name
+
+category_id matches; name = 'Electronics'
+
+Pass
+
+-
+
+TC07
+
+Product Belongs to Supplier
+
+Create product ? check product.supplier_id and product.supplier.name
+
+supplier_id matches; name = 'Acme'
+
+Pass
+
+-
+
+TC08
+
+Category Can Have Products
+
+Create 2 products under same category ? category.products
+
+Collection count = 2
+
+Pass
+
+-
+
+TC09
+
+Multiple Products Share Category
+
+Create 2 products with same category_id ? compare IDs
+
+Both products have same category_id
+
+Pass
+
+-
+
+TC10
+
+Inventory Created from Purchase
+
+Create purchase ? createInventoryRecord ? assertDatabaseHas
+
+Inventory with qty=10, status='available'
+
+Pass
+
+-
+
+TC11
+
+Purchase Can Be Created
+
+Purchase::create(...) ? assertDatabaseHas
+
+Purchase with status='pending' in DB
+
+Pass
+
+-
+
+TC12
+
+Purchase Product Can Be Created
+
+Create purchase & product ? PurchaseProduct::create ? assertDatabaseHas
+
+Record with serial_number='SN-PP-1' in DB
+
+Pass
+
+-
+
+TC13
+
+Loan Marks Inventory as Loaned
+
+Create inventory (available) ? createLoan(active) ? check status
+
+Inventory status = 'loaned'
+
+Pass
+
+-
+
+TC14
+
+Inventory Belongs to Purchase
+
+Create inventory ? check inventory.purchase_id
+
+purchase_id matches created purchase
+
+Pass
+
+-
+
+TC15
+
+Inventory Quantity Can Be Summed
+
+Create 2 inventory records (qty 4, 6) ? SUM query
+
+Sum = 10
+
+Pass
+
+-
+
+TC16
+
+Loan Belongs to Inventory
+
+Create loan ? check loan.inventory_id
+
+inventory_id matches created inventory
+
+Pass
+
+-
+
+TC17
+
+Loan Belongs to Department
+
+Create loan ? check loan.department_id
+
+department_id matches created department
+
+Pass
+
+-
+
+TC18
+
+Loan Activation Sets Inventory Loaned
+
+Create loan with status='active' ? inventory.fresh().status
+
+Inventory status = 'loaned'
+
+Pass
+
+-
+
+TC19
+
+Returned Loan Marks Inventory Available
+
+Create active loan ? update status='returned' ? check inventory
+
+Inventory status = 'available'
+
+Pass
+
+-
+
+TC20
+
+Multiple Inventory Items for Same Product
+
+Create 2 inventory records for same product ? count
+
+Count = 2
+
+Pass
+
+-
+
+TC21
+
+Multiple Loans for Different Inventory Items
+
+Create 2 inventory records ? loan each ? Loan::count()
+
+Loan count = 2
+
+Pass
+
+-
+
+
+
+Test Case ID
+
+Test Scenario
+
+Test Steps
+
+Expected Result
+
+Status
+
+Remarks
+
+TC22
+
+User Can Be Created
+
+User::create([name, email, password]) ? assertDatabaseHas
+
+User record in DB with correct name & email
+
+Pass
+
+-
+
+TC23
+
+User Password Is Hashed
+
+Create user ? compare stored password to plain text
+
+Stored password != plain-text password
+
+Pass
+
+-
+
+TC24
+
+User Can Have Roles
+
+Create role 'teacher' ? create user ? assignRole('teacher')?? assignRole('teacher') ? hasRole('teacher')
+
+User has 'teacher' role
+
+Pass
+
+Role is created before assignment
+
+TC25
+
+User Can Have Multiple Roles
+
+Create roles 'teacher' and 'user' ? create user ? assign both roles ? check both
+
+User has 'teacher' and 'user' roles
+
+Pass
+
+Roles are created before assignment
+
+TC26
+
+User Email Must Be Unique
+
+Create user ? create another with same email
+
+QueryException thrown
+
+Pass
+
+-
+
+TC27
+
+User Can Be Soft Deleted
+
+Create user ? delete() ? assertSoftDeleted
+
+deleted_at is set on user record
+
+Pass
+
+-
+
+TC28
+
+User Can Be Restored After Soft Delete
+
+Create user ? delete() ? restore() ? assertDatabaseHas
+
+User restored with email intact
+
+Pass
+
+-
+
+TC29
+
+User Hidden Attributes
+
+Create user ? toArray() ? check for 'password' & 'remember_token'
+
+Neither key present in array output
+
+Pass
+
+-
+
+TC30
+
+Product Belongs to Category (Unit)
+
+Create product ? check product.category
+
+category_id matches created category
+
+Pass
+
+-
+
+TC31
+
+Inventory Belongs to Product (Unit)
+
+Create inventory ? check inventory.product
+
+product_id matches created product
+
+Pass
+
+-
+
+TC32
+
+Loan Belongs to Department (Unit)
+
+Create loan ? check loan.department
+
+department_id matches created department
+
+Pass
+
+-
+
+
+
+8. Defect Report
+
+Defect ID
+
+Description
+
+Severity
+
+Steps to Reproduce
+
+Status
+
+D01
+
+User role assignment originally failed when the 'teacher' role did not exist before assignRole(). The test now creates the role first.
+
+High
+
+1. Run UserModel test  2. test_user_can_have_roles creates role 'teacher'  3. User::create() succeeds  4. assignRole('teacher') succeeds  5. hasRole('teacher') returns true
+
+Fixed
+
+D02
+
+Multiple role assignment originally failed when required roles did not exist before assignRole(). The test now creates both roles first.
+
+High
+
+1. Run UserModel test  2. test_user_can_have_multiple_roles creates roles 'teacher' and 'user'  3. User::create() succeeds  4. assignRole() succeeds for both roles  5. hasRole() returns true for both
+
+Fixed
+
+
+
+9. Test Results Summary
+
+Total Test Cases
+
+Passed
+
+Failed
+
+Pass Rate
+
+32
+
+32
+
+0
+
+100%
+
+
+
+10. Challenges & Limitations
+
+
+
+Filament panel components rely on Livewire, making automated browser-level testing require additional setup (e.g. Dusk)
+
+Database seeding required before each test run to ensure consistent data state
+
+Referential integrity (FK) constraints not enforced at application layer for category deletion
+
+No existing test coverage in the repository — all test cases written from scratch
+
+
+
+11. Conclusion & Recommendations
+
+
+
+The Inventory Management System core test suite now passes all documented test cases. Authentication access, product/category/supplier setup, purchase and inventory records, loan status updates, and user model behavior all pass in the automated PHPUnit run.
+
+
+
+Priority Fixes
+
+Add validation tests for required fields on Product, Supplier, and Purchase models to guard against incomplete data entry.
+
+D01 & D02 resolved: Role records are created before assignRole() in the role-related UserModel tests.
+
+General Recommendations
+
+Write PHPUnit unit tests for Product and Stock models (see attached test files)
+
+Write feature tests for authentication and CRUD routes
+
+Configure phpunit.xml to use SQLite in-memory database for faster isolated tests
+
+Integrate automated testing in a CI pipeline (e.g. GitHub Actions)
